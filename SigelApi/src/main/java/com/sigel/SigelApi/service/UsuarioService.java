@@ -76,7 +76,6 @@ public class UsuarioService implements UsuarioImpl {
                 .nombre(request.getNombre())
                 .apellidoPaterno(request.getApellidoPaterno())
                 .apellidoMaterno(request.getApellidoMaterno())
-                .telefono(request.getTelefono())
                 .rol(request.getRol() != null ? request.getRol() : UserRole.ALUMNO)
                 .grupo(request.getGrupoId() != null ? grupoService.buscarPorId(request.getGrupoId()) : null)
                 .fechaIngreso(request.getFechaIngreso())
