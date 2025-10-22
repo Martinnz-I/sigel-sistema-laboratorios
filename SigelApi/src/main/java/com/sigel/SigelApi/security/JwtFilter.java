@@ -103,6 +103,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 );
 
         SecurityContextHolder.getContext().setAuthentication(authToken);
+        log.info("Usuario autenticado: {}, rol: {}", usuario.getEmail(), usuario.getRol().getAuthority());
         return true;
     }
 }

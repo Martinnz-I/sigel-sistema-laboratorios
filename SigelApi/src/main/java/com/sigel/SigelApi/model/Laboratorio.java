@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "laboratorios", schema = "sigel",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"coordenada_x", "coordenada_y", "piso"})})
+@Table(name = "laboratorios", schema = "sigel")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,13 +38,14 @@ public class Laboratorio {
     @Column(name = "capacidad_alumnos")
     private Integer capacidadAlumnos;
 
-    @ManyToOne
-    @JoinColumn(name = "especialidad_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "especialidad_id", nullable = false)
     private Especialidad especialidad;
 
     @ManyToOne
     @JoinColumn(name = "encargado_id")
     private Usuario encargado;
+
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;

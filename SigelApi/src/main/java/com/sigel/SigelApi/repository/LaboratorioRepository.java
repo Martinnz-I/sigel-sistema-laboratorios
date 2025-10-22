@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LaboratorioRepository extends JpaRepository<Laboratorio, Long> {
+    long countByCodigoStartingWith(String codigo);
 }

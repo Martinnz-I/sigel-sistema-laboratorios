@@ -18,6 +18,18 @@ public class TokenVerificacionService implements TokenVerficacionImpl {
     }
 
     @Override
+    public boolean buscarPorUsuarioYUtilizado(Long idUsuario) {
+        return repository.findByUsuarioIdAndUtilizado(idUsuario, false).isPresent();
+    }
+
+    @Override
+    public TokenVerificacion buscarPorUsuarioYNoUtilizado(Long usuarioId) {
+        return repository.findByUsuarioIdAndUtilizadoFalse(usuarioId).orElseThrow(() ->
+                new AuthenticationException("Antes de iniciar sesión, verifica tu correo electrónico. " +
+                        "Te enviamos un enlace de verificación; revisa tu bandeja de entrada o carpeta de spam."));
+    }
+
+    @Override
     public TokenVerificacion guardar(TokenVerificacion tokenVerificacion) {
         return repository.save(tokenVerificacion);
     }

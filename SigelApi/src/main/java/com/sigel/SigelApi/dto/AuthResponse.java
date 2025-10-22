@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AuthResponse {
-    private Long usuarioId;
-    private String email;
-    private String nombre;
-    private String rol;
     private String token;
     private String refreshToken;
     private LocalDateTime tokenExpira;
-    private boolean emailVerificado;
+    private String email;
+    private String nombre;
+    private String apellidoPat;
+    private String apellidoMat;
+    private String rol;
 }

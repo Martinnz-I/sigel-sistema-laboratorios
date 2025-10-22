@@ -3,157 +3,188 @@ package com.sigel.SigelApi.controller;
 import com.sigel.SigelApi.dto.*;
 import com.sigel.SigelApi.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador de autenticación
- * Maneja registro, login, refresh token y logout
- */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Slf4j
-@Tag(name = "Autenticación", description = "Endpoints para autenticación, registro y manejo de sesiones")
+@Tag(name = "Autenticación", description = "API para autenticación, registro y gestión de sesiones de usuarios")
 public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * Registra un nuevo usuario
-     * POST /auth/registro
-     */
     @PostMapping("/registro")
-    @Operation(summary = "Registrar nuevo usuario", description = "Crea una nueva cuenta de usuario")
+    @Operation(
+            summary = "Registrar nuevo usuario",
+            description = "Crea una nueva cuenta de usuario en el sistema. El email debe ser único y se enviará un correo de verificación."
+    )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Error en validación o datos duplicados"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "201",
+                    description = "Usuario registrado exitosamente",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Error en validación o datos duplicados (email, matrícula o clave docente ya existen)"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
     })
-    public ResponseEntity<ApiResponse<AuthResponse>> registro(
-            @Valid @RequestBody RegistroRequest request) {
-
-        log.info("Intento de registro para email: {}", request.getEmail());
-
-        AuthResponse response = authService.registrar(request);
-
-        log.info("Usuario registrado exitosamente: {}", request.getEmail());
+    public ResponseEntity<ApiResponse<Void>> registro(
+            @Valid @RequestBody RegistroRequest request
+    ) {
+        String mensaje = authService.registrar(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "Usuario registrado. Verifica tu email para activar tu cuenta"));
+                .body(ApiResponse.success(null, mensaje));
     }
 
-    /**
-     * Autentica un usuario con credenciales
-     * POST /auth/login
-     * Acepta: email, matrícula o clave docente
-     */
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión", description = "Autentica un usuario y retorna tokens JWT")
+    @Operation(
+            summary = "Iniciar sesión",
+            description = "Autentica un usuario mediante email, matrícula o clave docente y retorna tokens JWT (access token y refresh token)"
+    )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login exitoso"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Login exitoso, retorna tokens de acceso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Credenciales inválidas o cuenta no verificada"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Datos de entrada inválidos"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
     })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
-            @Valid @RequestBody LoginRequest request) {
-
-        log.info("Intento de login con credenciales: {}", request.getCredenciales());
-
+            @Valid @RequestBody LoginRequest request
+    ) {
         AuthResponse response = authService.login(request);
-
-        log.info("Login exitoso para usuario ID: {}", response.getUsuarioId());
 
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.success(response, "Login exitoso"));
     }
 
-    /**
-     * Refresca el token de acceso usando el refresh token
-     * POST /auth/refresh
-     */
     @PostMapping("/refresh")
-    @Operation(summary = "Refrescar token", description = "Genera un nuevo access token usando el refresh token")
+    @Operation(
+            summary = "Refrescar token de acceso",
+            description = "Genera un nuevo access token utilizando un refresh token válido. Útil para mantener sesiones activas sin requerir login nuevamente."
+    )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Token refrescado exitosamente"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Refresh token inválido o expirado"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Token refrescado exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Refresh token inválido, expirado o revocado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Datos de entrada inválidos"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
     })
     public ResponseEntity<ApiResponse<AuthResponse>> refrescarToken(
-            @Valid @RequestBody RefreshTokenRequest request) {
-
-        log.info("Intento de refresh token");
-
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
         AuthResponse response = authService.refrescarToken(request);
-
-        log.info("Token refrescado exitosamente para usuario ID: {}", response.getUsuarioId());
 
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.success(response, "Token refrescado exitosamente"));
     }
 
-    /**
-     * Cierra la sesión actual del usuario
-     * POST /auth/logout
-     */
     @PostMapping("/logout")
-    @Operation(summary = "Cerrar sesión", description = "Cierra la sesión actual del usuario")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(
+            summary = "Cerrar sesión",
+            description = "Cierra la sesión actual del usuario invalidando el access token proporcionado"
+    )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Logout exitoso"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Token inválido"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "204",
+                    description = "Sesión cerrada exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token inválido o no autenticado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Header Authorization inválido"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
     })
     public ResponseEntity<Void> logout(
-            @RequestHeader(value = "Authorization") String authHeader) {
-
+            @Parameter(description = "Token JWT en formato: Bearer <token>", required = true)
+            @RequestHeader(value = "Authorization") String authHeader
+    ) {
         String token = extraerToken(authHeader);
-
-        log.info("Intento de logout");
-
         authService.logout(token);
-
-        log.info("Logout exitoso");
 
         return ResponseEntity
                 .noContent()
                 .build();
     }
 
-    /**
-     * Cierra todas las sesiones del usuario
-     * POST /auth/logout-todas
-     */
     @PostMapping("/logout-todas")
-    @Operation(summary = "Cerrar todas las sesiones", description = "Cierra todas las sesiones activas del usuario")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(
+            summary = "Cerrar todas las sesiones",
+            description = "Cierra todas las sesiones activas del usuario en todos los dispositivos"
+    )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Logout de todas las sesiones exitoso"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Token inválido o usuario no autenticado"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "204",
+                    description = "Todas las sesiones cerradas exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token inválido o usuario no autenticado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Header Authorization inválido"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
     })
     public ResponseEntity<Void> logoutTodas(
-            @RequestHeader(value = "Authorization") String authHeader) {
-
+            @Parameter(description = "Token JWT en formato: Bearer <token>", required = true)
+            @RequestHeader(value = "Authorization") String authHeader
+    ) {
         String token = extraerToken(authHeader);
-
-        log.info("Intento de logout de todas las sesiones");
-
-        authService.logout(token); // Logout actual
-
-        // Aquí también puedes cerrar todas las otras sesiones si lo necesitas
-        // authService.logoutTodas(usuarioId);
-
-        log.info("Logout de todas las sesiones exitoso");
+        authService.logoutTodas(token);
 
         return ResponseEntity
                 .noContent()
@@ -161,24 +192,144 @@ public class AuthController {
     }
 
     @PostMapping("/verificar-email")
-    @Operation(summary = "Verificar email", description = "Verifica el email del usuario usando el token recibido")
+    @Operation(
+            summary = "Verificar email",
+            description = "Verifica la dirección de email del usuario utilizando el token de verificación recibido por correo"
+    )
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Email verificado exitosamente"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Token inválido o expirado"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno del servidor")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Email verificado exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Token de verificación inválido, expirado o ya utilizado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Usuario no encontrado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
     })
-    public ResponseEntity<ApiResponse<String>> verificarEmail(
-            @Valid @RequestBody VerificacionEmailRequest request) {
-
-        log.info("Intento de verificación de email con token");
-
+    public ResponseEntity<ApiResponse<Void>> verificarEmail(
+            @Valid @RequestBody VerificacionEmailRequest request
+    ) {
         authService.verificarEmail(request.getToken());
-
-        log.info("Email verificado exitosamente");
 
         return ResponseEntity
                 .ok()
-                .body(ApiResponse.success("Email verificado", "Tu email ha sido verificado exitosamente"));
+                .body(ApiResponse.success(null, "Email verificado exitosamente"));
+    }
+
+    @PostMapping("/reenviar-verificacion")
+    @Operation(
+            summary = "Reenviar email de verificación",
+            description = "Envía un nuevo correo de verificación al usuario"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Email de verificación enviado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Email ya verificado o datos inválidos"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Usuario no encontrado"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
+    })
+    public ResponseEntity<ApiResponse<Void>> reenviarVerificacion(
+            @Valid @RequestBody ReenviarVerificacionRequest request
+    ) {
+        authService.reenviarVerificacion(request.getEmail());
+
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.success(null, "Email de verificación enviado"));
+    }
+
+    @PostMapping("/recuperar-password")
+    @Operation(
+            summary = "Solicitar recuperación de contraseña",
+            description = "Envía un correo con un enlace para restablecer la contraseña"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Email de recuperación enviado (siempre retorna 200 por seguridad)"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Datos inválidos"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
+    })
+    public ResponseEntity<ApiResponse<Void>> recuperarPassword(
+            @Valid @RequestBody RecuperarPasswordRequest request
+    ) {
+        authService.solicitarRecuperacionPassword(request.getEmail());
+
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.success(null, "Si el email existe, recibirás instrucciones para recuperar tu contraseña"));
+    }
+
+    @PostMapping("/restablecer-password")
+    @Operation(
+            summary = "Restablecer contraseña",
+            description = "Restablece la contraseña del usuario utilizando el token de recuperación"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Contraseña restablecida exitosamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Token inválido, expirado o contraseña no cumple requisitos"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor"
+            )
+    })
+    public ResponseEntity<ApiResponse<Void>> restablecerPassword(
+            @Valid @RequestBody RestablecerPasswordRequest request
+    ) {
+        authService.restablecerPassword(request.getToken(), request.getNuevaPassword());
+
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.success(null, "Contraseña restablecida exitosamente"));
+    }
+
+    @GetMapping("/health")
+    @Operation(
+            summary = "Health check",
+            description = "Verifica el estado y disponibilidad del servicio de autenticación"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Servicio disponible"
+            )
+    })
+    public ResponseEntity<ApiResponse<String>> health() {
+        return ResponseEntity
+                .ok()
+                .body(ApiResponse.success("OK", "Servicio de autenticación disponible"));
     }
 
     /**
@@ -186,17 +337,8 @@ public class AuthController {
      */
     private String extraerToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Header Authorization inválido. Formato: Bearer <token>");
+            throw new IllegalArgumentException("Header Authorization inválido. Formato esperado: Bearer <token>");
         }
         return authHeader.substring(7);
-    }
-
-    /**
-     * Health check del módulo de autenticación
-     */
-    @GetMapping("/health")
-    @Operation(summary = "Health check", description = "Verifica que el servicio de autenticación esté disponible")
-    public ResponseEntity<ApiResponse<String>> health() {
-        return ResponseEntity.ok(ApiResponse.success("OK", "Servicio de autenticación disponible"));
     }
 }

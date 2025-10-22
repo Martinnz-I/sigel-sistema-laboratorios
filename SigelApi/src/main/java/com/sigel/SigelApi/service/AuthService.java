@@ -8,6 +8,7 @@ import com.sigel.SigelApi.enums.TipoCredencial;
 import com.sigel.SigelApi.enums.UserRole;
 import com.sigel.SigelApi.exceptions.AuthenticationException;
 import com.sigel.SigelApi.exceptions.RegistroException;
+import com.sigel.SigelApi.model.PasswordRecoveryToken;
 import com.sigel.SigelApi.model.Sesion;
 import com.sigel.SigelApi.model.TokenVerificacion;
 import com.sigel.SigelApi.model.Usuario;
@@ -38,6 +39,7 @@ public class AuthService {
     private final SesionService sesionService;
     private final EmailService emailService;
     private final TokenVerificacionService tokenVerificacionService;
+    private final PasswordRecoveryTokenService passwordRecoveryTokenService;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final HttpServletRequest request;
@@ -57,7 +59,7 @@ public class AuthService {
     /**
      * Registra un nuevo usuario
      */
-    public AuthResponse registrar(RegistroRequest request) {
+    public String registrar(RegistroRequest request) {
         validarRegistro(request);
 
         // Si es ALUMNO, puede registrarse sin autenticación
@@ -70,7 +72,7 @@ public class AuthService {
         return registrarUsuarioConVerificacionAutomatica(request);
     }
 
-    private AuthResponse registrarAlumno(RegistroRequest request) {
+    private String registrarAlumno(RegistroRequest request) {
         String passwordEncriptada = passwordEncoder.encode(request.getPassword());
         Usuario usuario = usuarioService.guardar(
                 usuarioService.construir(request, passwordEncriptada)
@@ -81,22 +83,13 @@ public class AuthService {
 
         log.info("Alumno registrado. Email de verificación enviado a: {}", usuario.getEmail());
 
-        return AuthResponse.builder()
-                .usuarioId(usuario.getId())
-                .email(usuario.getEmail())
-                .nombre(usuario.getNombre())
-                .rol(usuario.getRol().getAuthority())
-                .token(null)
-                .refreshToken(null)
-                .tokenExpira(null)
-                .emailVerificado(false)
-                .build();
+        return "Has sido registrado exitosamente. Verifica tu email para activar tu cuenta";
     }
 
     /**
      * Registra un usuario (MAESTRO/admin) - Solo admin puede hacerlo
      */
-    private AuthResponse registrarUsuarioConVerificacionAutomatica(RegistroRequest request) {
+    private String registrarUsuarioConVerificacionAutomatica(RegistroRequest request) {
         String passwordEncriptada = passwordEncoder.encode(request.getPassword());
         Usuario usuario = usuarioService.guardar(
                 usuarioService.construir(request, passwordEncriptada)
@@ -108,16 +101,13 @@ public class AuthService {
 
         log.info("Usuario {} registrado por admin. Email: {}", request.getRol(), usuario.getEmail());
 
-        return AuthResponse.builder()
-                .usuarioId(usuario.getId())
-                .email(usuario.getEmail())
-                .nombre(usuario.getNombre())
-                .rol(usuario.getRol().getAuthority())
-                .token(null)
-                .refreshToken(null)
-                .tokenExpira(null)
-                .emailVerificado(true)
-                .build();
+        String rolUsuario = switch(usuario.getRol()) {
+            case MAESTRO -> "Maestro";
+            case ADMINISTRADOR -> "Administrador";
+            default -> "Usuario";
+        };
+
+        return rolUsuario + "registrado exitosamente";
     }
 
     /**
@@ -137,6 +127,85 @@ public class AuthService {
     }
 
     /**
+     * Reenvía el email de verificación al usuario
+     */
+    public void reenviarVerificacion(String email) {
+        Usuario usuario = usuarioService.buscarPorEmail(email,
+                new AuthenticationException(USUARIO_NO_ENCONTRADO));
+
+        if (usuario.getEmailVerificado()) {
+            throw new RegistroException("El email ya está verificado");
+        }
+
+        // Invalidar token anterior si existe
+        TokenVerificacion tokenAnterior = tokenVerificacionService
+                .buscarPorUsuarioYNoUtilizado(usuario.getId());
+
+        if (tokenAnterior != null) {
+            tokenAnterior.setUtilizado(true);
+            tokenVerificacionService.guardar(tokenAnterior);
+        }
+
+        // Generar nuevo token y enviar email
+        String nuevoToken = generarTokenVerificacion(usuario);
+        emailService.enviarEmailVerificacion(email, nuevoToken);
+
+        log.info("Email de verificación reenviado a: {}", email);
+    }
+
+    /**
+     * Solicita la recuperación de contraseña
+     * Genera un token y lo envía por email
+     */
+    public void solicitarRecuperacionPassword(String email) {
+        // Buscar usuario - Si no existe, no revelar por seguridad
+        Usuario usuario = usuarioService.buscarPorEmail(email, new AuthenticationException(USUARIO_NO_ENCONTRADO));
+
+        if (usuario == null) {
+            return;
+        }
+
+        // Validar que el usuario esté activo
+        validarUsuarioActivo(usuario);
+
+        // Invalidar tokens anteriores del usuario
+        passwordRecoveryTokenService.invalidarTokensDelUsuario(usuario);
+
+        // Generar y guardar nuevo token
+        String token = passwordRecoveryTokenService.generarToken(usuario);
+
+        // Enviar email con el token
+        emailService.enviarEmailRecuperacion(email, token);
+    }
+
+    /**
+     * Restablece la contraseña usando un token de recuperación
+     */
+    public void restablecerPassword(String tokenStr, String nuevaPassword) {
+        // Buscar y validar el token
+        PasswordRecoveryToken token = passwordRecoveryTokenService.buscarPorToken(tokenStr);
+        passwordRecoveryTokenService.validarToken(token);
+
+        // Obtener usuario
+        Usuario usuario = token.getUsuario();
+
+        // Validar que el usuario esté activo
+        validarUsuarioActivo(usuario);
+
+        // Cambiar contraseña
+        String passwordEncriptada = passwordEncoder.encode(nuevaPassword);
+        usuario.setPasswordHash(passwordEncriptada);
+        usuarioService.guardar(usuario);
+
+        // Marcar token como usado
+        passwordRecoveryTokenService.marcarComoUtilizado(token);
+
+        // Cerrar todas las sesiones activas del usuario por seguridad
+        cerrarTodasLasSesionesDelUsuario(usuario);
+    }
+
+
+    /**
      * Autentica un usuario con email, matrícula o clave docente
      */
     public AuthResponse login(LoginRequest request) {
@@ -152,6 +221,13 @@ public class AuthService {
         };
 
         validarUsuarioActivo(usuario);
+
+        tokenVerificacionService.buscarPorUsuarioYUtilizado(usuario.getId());
+
+        if(!usuario.getEmailVerificado()) {
+            throw new AuthenticationException("Antes de iniciar sesión, debes verificar tu correo electrónico.");
+        }
+
         validarPassword(usuario, request.getPassword());
 
         usuarioService.aplicarUltimoAcceso(usuario);
@@ -195,15 +271,16 @@ public class AuthService {
 
         sesion.setActivo(false);
         sesionService.guardar(sesion);
-
-        log.info("Sesión cerrada para usuario: {}", sesion.getUsuario().getEmail());
     }
 
     /**
      * Cierra todas las sesiones de un usuario
      */
-    public long logoutTodas(Long usuarioId) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId,
+    public long logoutTodas(String token) {
+        Sesion sesionBusqueda = sesionService.buscarPorToken(token,
+                new AuthenticationException(TOKEN_INVALIDO));
+
+        Usuario usuario = usuarioService.buscarPorId(sesionBusqueda.getUsuario().getId(),
                 new AuthenticationException(USUARIO_NO_ENCONTRADO));
 
         List<Sesion> sesionesActivas = sesionService.buscarPorUsuarioActivo(usuario);
@@ -213,7 +290,6 @@ public class AuthService {
             sesionService.guardar(sesion);
         });
 
-        log.info("Se cerraron {} sesiones para usuario: {}", sesionesActivas.size(), usuario.getEmail());
         return sesionesActivas.size();
     }
 
@@ -308,14 +384,14 @@ public class AuthService {
     private AuthResponse construirAuthResponse(Usuario usuario, String token,
                                                String refreshToken, LocalDateTime expiraEn) {
         return AuthResponse.builder()
-                .usuarioId(usuario.getId())
-                .email(usuario.getEmail())
-                .nombre(usuario.getNombre())
-                .rol(usuario.getRol().getAuthority())
                 .token(token)
                 .refreshToken(refreshToken)
                 .tokenExpira(expiraEn)
-                .emailVerificado(usuario.getEmailVerificado())
+                .email(usuario.getEmail())
+                .nombre(usuario.getNombre())
+                .apellidoPat(usuario.getApellidoPaterno())
+                .apellidoMat(usuario.getApellidoMaterno())
+                .rol(usuario.getRol().getAuthority())
                 .build();
     }
 
@@ -493,5 +569,18 @@ public class AuthService {
         }
 
         return null;
+    }
+
+    private void cerrarTodasLasSesionesDelUsuario(Usuario usuario) {
+        List<Sesion> sesionesActivas = sesionService.buscarPorUsuarioActivo(usuario);
+
+        sesionesActivas.forEach(sesion -> {
+            sesion.setActivo(false);
+            sesionService.guardar(sesion);
+        });
+
+        if (!sesionesActivas.isEmpty()) {
+            log.info("Cerradas {} sesiones del usuario: {}", sesionesActivas.size(), usuario.getEmail());
+        }
     }
 }

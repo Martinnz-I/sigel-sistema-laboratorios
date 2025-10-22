@@ -22,6 +22,9 @@ public class Especialidad {
     @Column(length = 100, nullable = false, unique = true)
     private String nombre;
 
+    @Column(length = 20, nullable = false, unique = true)
+    private String abreviatura;
+
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 

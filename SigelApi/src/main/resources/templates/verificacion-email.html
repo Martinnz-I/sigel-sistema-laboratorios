@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo-container {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .logo-tagline {
+            font-size: 11px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .header-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 1s ease-in-out;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 50px 40px;
+        }
+
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #6e6e73;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .alert-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px 0;
+            border-left: 5px solid #ffc107;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+        }
+
+        .alert-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .alert-text {
+            font-size: 14px;
+            color: #856404;
+            font-weight: 500;
+        }
+
+        .alert-text strong {
+            font-weight: 700;
+            color: #664d03;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .verify-button {
+            display: inline-block;
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #0066CC 0%, #004C99 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 17px;
+            box-shadow: 0 8px 24px rgba(0, 102, 204, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verify-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .verify-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 102, 204, 0.5);
+        }
+
+        .verify-button:hover::before {
+            left: 100%;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e5ea, transparent);
+            margin: 40px 0;
+        }
+
+        .token-section {
+            background: #f5f5f7;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid #e5e5ea;
+        }
+
+        .token-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 15px;
+        }
+
+        .token-sublabel {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 12px;
+        }
+
+        .token-code {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            word-break: break-all;
+            font-size: 14px;
+            color: #0066CC;
+            border: 2px dashed #d1d1d6;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .api-endpoint {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #6e6e73;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e5ea;
+        }
+
+        .api-endpoint code {
+            color: #0066CC;
+            font-weight: 600;
+            font-family: 'SF Mono', monospace;
+        }
+
+        .footer-note {
+            font-size: 14px;
+            color: #8e8e93;
+            text-align: center;
+            margin-top: 35px;
+            padding: 20px;
+            background: #f5f5f7;
+            border-radius: 12px;
+        }
+
+        .footer {
+            background: #f5f5f7;
+            text-align: center;
+            padding: 35px 30px;
+            border-top: 1px solid #e5e5ea;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            color: #8e8e93;
+            margin: 8px 0;
+        }
+
+        .footer-brand {
+            font-weight: 600;
+            color: #0066CC;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .content {
+                padding: 35px 25px;
+            }
+
+            .header {
+                padding: 40px 25px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .verify-button {
+                padding: 16px 40px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <div class="logo-section">
+        <div class="logo-container">
+            <div class="logo">SGLab</div>
+            <div class="logo-tagline">Laboratory Management</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">📧</div>
+            <h1>Verifica tu Email</h1>
+        </div>
+
+        <div class="content">
+            <div class="greeting">¡Hola! 👋</div>
+
+            <p class="message">
+                Gracias por unirte a <strong>SGLab</strong>. Estás a solo un paso de acceder a tu cuenta y comenzar a gestionar tu laboratorio de manera eficiente.
+            </p>
+
+            <div class="alert-box">
+                <div class="alert-icon">⏰</div>
+                <div class="alert-text">
+                    <strong>Importante:</strong> Este enlace expira en <strong>24 horas</strong>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <a href="{{urlVerificacion}}" class="verify-button">
+                    ✓ Verificar mi Email
+                </a>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="token-section">
+                <div class="token-label">🔐 Verificación Manual</div>
+                <div class="token-sublabel">Si prefieres, copia este código de verificación:</div>
+                <div class="token-code">{{token}}</div>
+                <div class="api-endpoint">
+                    Envíalo a: <code>POST {{backendUrl}}/api/v1/auth/verificar-email</code>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                ℹ️ Si no creaste esta cuenta, puedes ignorar este correo de forma segura. No se realizará ningún cambio en tu información.
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text"><span class="footer-brand">SGLab</span> © 2025</p>
+            <p class="footer-text">Sistema de Gestión de Laboratorios</p>
+            <p class="footer-text" style="margin-top: 15px; font-size: 12px;">
+                Este es un correo automático, por favor no respondas.
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
