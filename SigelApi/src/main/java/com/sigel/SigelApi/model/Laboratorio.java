@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "laboratorios", schema = "sigel")
+@Table(name = "laboratorios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,43 +27,44 @@ public class Laboratorio {
     @Column(length = 100, nullable = false)
     private String nombre; // Ej: "Laboratorio de Electrónica Básica"
 
+    @Column(nullable = false)
+    private String mapaUrl;
+
     @Column(name = "coordenada_x", nullable = false, precision = 5, scale = 2)
     private BigDecimal coordenadaX;
 
     @Column(name = "coordenada_y", nullable = false, precision = 5, scale = 2)
     private BigDecimal coordenadaY;
-    @Builder.Default
-    private Integer piso = 1;
 
-    @Column(name = "capacidad_alumnos")
+    @Builder.Default
+    private int piso = 1;
+
     private Integer capacidadAlumnos;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "especialidad_id", nullable = false)
     private Especialidad especialidad;
 
-    @ManyToOne
-    @JoinColumn(name = "encargado_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "encargado_id", nullable = false)
     private Usuario encargado;
-
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "horario_apertura", nullable = false)
+    @Column(nullable = false)
     private LocalTime horarioApertura;
 
-    @Column(name = "horario_cierre", nullable = false)
+    @Column(nullable = false)
     private LocalTime horarioCierre;
 
-    @Column(nullable = false)
     @Builder.Default
-    private Boolean activo = true;
+    private boolean activo = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

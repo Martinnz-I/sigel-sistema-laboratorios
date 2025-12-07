@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "refacciones", schema = "sigel")
+@Table(name = "refacciones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,24 +30,23 @@ public class Refaccion {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(nullable = false)
     @Builder.Default
-    private Integer cantidad = 1;
+    private int cantidad = 1;
 
-    @Column(name = "costo_unitario", precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2)
     private BigDecimal costoUnitario;
 
-    @Column(name = "costo_total", precision = 10, scale = 2)
+    @Column(precision = 10, scale = 2)
     private BigDecimal costoTotal;
 
     @ManyToOne
     @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;
 
-    @Column(name = "numero_parte", length = 100)
+    @Column(length = 100)
     private String numeroParte;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

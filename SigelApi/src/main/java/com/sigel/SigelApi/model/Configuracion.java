@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "configuracion", schema = "sigel")
+@Table(name = "configuracion")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,11 +31,9 @@ public class Configuracion {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean modificable = true;
+    private boolean modificable = true;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @ManyToOne

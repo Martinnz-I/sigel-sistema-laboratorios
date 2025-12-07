@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "estadisticas_diarias", schema = "sigel")
+@Table(name = "estadisticas_diarias")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,56 +20,37 @@ public class EstadisticaDiaria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = false)
+    @Column(nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "total_prestamos", nullable = false)
-    @Builder.Default
-    private Integer totalPrestamos = 0;
+    private int totalPrestamos;
 
-    @Column(name = "total_devoluciones", nullable = false)
-    @Builder.Default
-    private Integer totalDevoluciones = 0;
+    private int totalDevoluciones;
 
-    @Column(name = "prestamos_a_tiempo", nullable = false)
-    @Builder.Default
-    private Integer prestamos_a_tiempo = 0;
+    @Column(name = "prestamos_a_tiempo")
+    private int prestamosAtiempo;
 
-    @Column(name = "prestamos_tarde", nullable = false)
-    @Builder.Default
-    private Integer prestamos_tarde = 0;
+    private int prestamos_tarde;
 
-    @Column(name = "equipos_disponibles", nullable = false)
-    @Builder.Default
-    private Integer equiposDisponibles = 0;
+    private int equiposDisponibles;
 
-    @Column(name = "equipos_en_uso", nullable = false)
-    @Builder.Default
-    private Integer equiposEnUso = 0;
+    private int equiposEnUso;
 
-    @Column(name = "equipos_en_mantenimiento", nullable = false)
-    @Builder.Default
-    private Integer equiposEnMantenimiento = 0;
+    private int equiposEnMantenimiento;
 
-    @Column(name = "tickets_abiertoss", nullable = false)
-    @Builder.Default
-    private Integer ticketsAbiertos = 0;
+    private int ticketsAbiertos;
 
-    @Column(name = "tickets_cerrados", nullable = false)
-    @Builder.Default
-    private Integer ticketsCerrados = 0;
+    private int ticketsCerrados;
 
-    @Column(name = "usuariosActivos", nullable = false)
-    @Builder.Default
-    private Integer usuariosActivos = 0;
+    private int usuariosActivos;
 
-    @Column(name = "tiempo_promedio_uso_minutos", nullable = false)
+    @Column(nullable = false)
     private Integer tiempoPromedioUsoMinutos;
 
-    @Column(name = "tiempo_promedio_respuesta_tickets_horas", nullable = false)
+    @Column(nullable = false)
     private Integer tiempoPromedioRespuestaTicketsHoras;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

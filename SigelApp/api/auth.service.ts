@@ -1,133 +1,87 @@
-import axios, { AxiosError } from 'axios';
-import { AuthResponse, LoginRequest, ApiResponse, ErrorResponse } from '../types/auth.types';
-import { jwtDecode } from 'jwt-decode';
+import axios, { AxiosResponse } from 'axios';
+import Config from 'react-native-config';
+import { AuthResponse, LoginRequest, RegistroRequest, VerificarEmailResponse } from '../types/auth.types';
+import { ApiResponse } from '../types/global.types';
 
-// Configura tu URL base del backend
-const API_BASE_URL = 'http://192.168.0.8:8080'; // Cambia esto por tu URL
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Interceptor para manejar errores de respuesta
-api.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError<ErrorResponse>) => {
-    if (error.response) {
-      // El servidor respondió con un código de estado fuera del rango 2xx
-      const errorData = error.response.data;
-      throw {
-        message: errorData.message || 'Error en la solicitud',
-        status: errorData.status,
-        error: errorData.error,
-      };
-    } else if (error.request) {
-      // La solicitud se hizo pero no se recibió respuesta
-      throw {
-        message: 'No se pudo conectar con el servidor',
-        status: 0,
-        error: 'Network Error',
-      };
-    } else {
-      // Algo sucedió al configurar la solicitud
-      throw {
-        message: error.message || 'Error desconocido',
-        status: 0,
-        error: 'Unknown Error',
-      };
-    }
-  }
-);
+const API_BASE_URL = `${Config.API_URL}/auth`;
 
 export const authService = {
-  /**
-   * Login de usuario
-   */
-  login: async (credenciales: string, password: string): Promise<AuthResponse> => {
-  const loginData: LoginRequest = {
-    credenciales,
-    password,
-  };
+    /**
+     * Iniciar sesión
+     * @param credentials Objeto con credenciales (usuario/email y password)
+     */
+    login: async (credenciales: LoginRequest): Promise<AuthResponse> => {
+        try {
+            const response = await axios.post<ApiResponse<AuthResponse>>(`${API_BASE_URL}/login`, credenciales);
 
-  const response = await api.post<ApiResponse<AuthResponse>>(
-    '/auth/login',
-    loginData
-  );
-
-  if (response.data.success && response.data.data) {
-    return response.data.data;
-  } else {
-    throw new Error(response.data.message || 'Error al iniciar sesión');
-  }
-},
-
-  logout: async (token: string): Promise<void> => {
-    try {
-      await api.post(
-        '/auth/logout',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            console.log("Respuesta: " + JSON.stringify(response.data, null, 2));
+            return response.data.data!;
+        } catch (err: any) {
+            // Lanza el error para que el store lo capture
+            throw err;
         }
-      );
-    } catch (error) {
-      console.error('Error en logout:', error);
-      throw error;
-    }
-  },
+    },
 
-  /**
-   * Refrescar token de acceso
-   */
-  refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
-    try {
-      const response = await api.post<ApiResponse<AuthResponse>>(
-        '/auth/refresh',
-        { refreshToken }
-      );
+    /**
+ * Registrar nuevo usuario
+ * @param datosRegistro Objeto con los datos del nuevo usuario
+ */
+    register: async (datosRegistro: RegistroRequest): Promise<ApiResponse<void>> => {
+        try {
+            const response = await axios.post<ApiResponse<void>>(
+                `${API_BASE_URL}/registro`,
+                datosRegistro
+            );
 
-      if (response.data.success && response.data.data) {
-        return response.data.data;
-      } else {
-        throw new Error(response.data.message || 'Error al refrescar token');
-      }
-    } catch (error) {
-      console.error('Error al refrescar token:', error);
-      throw error;
-    }
-  },
+            console.log("Respuesta de registro:", JSON.stringify(response.data, null, 2));
 
-  /**
-   * Verificar si el token está expirado
-   */
-  isTokenExpired: (token: string): boolean => {
-    try {
-      const decoded: any = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      
-      // Considerar expirado si faltan menos de 5 minutos
-      return decoded.exp < currentTime + 300;
-    } catch (error) {
-      console.error('Error al decodificar token:', error);
-      return true;
-    }
-  },
+            return response.data;
+        } catch (err: any) {
+            // Lanza el error para que el store lo capture o lo maneje el frontend
+            throw err;
+        }
+    },
 
-  /**
-   * Obtener información del usuario desde el token
-   */
-  getUserFromToken: (token: string): any => {
-    try {
-      return jwtDecode(token);
-    } catch (error) {
-      console.error('Error al obtener usuario del token:', error);
-      return null;
-    }
-  },
+    /**
+     * Cerrar sesión
+     * @param token Token de acceso
+     */
+    logout: async (token: string): Promise<void> => {
+        try {
+            await axios.post(`${API_BASE_URL}/logout`, null, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+        } catch (err: any) {
+            throw err;
+        }
+    },
+
+    /**
+     * Refrescar token de acceso
+     * @param refreshToken Token de refresco
+     */
+    refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
+        try {
+            const response = await axios.post<ApiResponse<AuthResponse>>(`${API_BASE_URL}/refresh`, {
+                refreshToken,
+            });
+            return response.data.data!;
+        } catch (err: any) {
+            throw err;
+        }
+    },
+
+    /**
+     * Verificar si el token está expirado
+     * @param token JWT de acceso
+     */
+    isTokenExpired: (token: string): boolean => {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1])); // decode JWT payload
+            const exp = payload.exp * 1000; // exp en milisegundos
+            return Date.now() > exp;
+        } catch {
+            return true; // Si el token no es válido, se considera expirado
+        }
+    },
 };

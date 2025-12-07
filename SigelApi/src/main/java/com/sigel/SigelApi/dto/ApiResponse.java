@@ -18,9 +18,6 @@ public class ApiResponse<T> {
     private T data;
     private String error;
 
-    /**
-     * Crea una respuesta exitosa con datos
-     */
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()
                 .success(true)
@@ -29,9 +26,6 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    /**
-     * Crea una respuesta exitosa sin datos
-     */
     public static <T> ApiResponse<T> success(String message) {
         return ApiResponse.<T>builder()
                 .success(true)
@@ -39,9 +33,6 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    /**
-     * Crea una respuesta de error
-     */
     public static <T> ApiResponse<T> error(String message, String errorDetail) {
         return ApiResponse.<T>builder()
                 .success(false)
@@ -50,9 +41,6 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    /**
-     * Crea una respuesta de error simple (sin detalle adicional)
-     */
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
                 .success(false)

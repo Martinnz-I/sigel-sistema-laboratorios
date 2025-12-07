@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ubicaciones", schema = "sigel")
+@Table(name = "ubicaciones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,7 +39,7 @@ public class Ubicacion {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

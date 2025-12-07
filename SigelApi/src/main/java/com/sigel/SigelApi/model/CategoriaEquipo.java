@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "categorias_equipos", schema = "sigel")
+@Table(name = "categorias_equipos")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,11 +32,10 @@ public class CategoriaEquipo {
     @JoinColumn(name = "parent_id")
     private CategoriaEquipo parent;
 
-    @Column(nullable = false)
     @Builder.Default
     private Boolean activo = true;
 
-    @Column(name = "created_at", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private LocalDateTime createdAt;
 
     @PrePersist

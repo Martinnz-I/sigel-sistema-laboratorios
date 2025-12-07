@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name = "mantenimientos", schema = "sigel")
+@Table(name = "mantenimientos")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,59 +39,53 @@ public class Mantenimiento {
     @JoinColumn(name = "tecnico_id")
     private Usuario tecnico;
 
-    @Column(name = "descripcion_problema", columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String descripcionProblema;
 
-    @Column(name = "descripcion_solucion", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String descripcionSolucion;
 
-    @Column(name = "fecha_solicitud")
+    @Column(nullable = false)
     private LocalDateTime fechaSolicitud;
 
-    @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;
 
-    @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
 
-    @Column(name = "duracion_dias")
     private Integer duracionDias;
 
-    @Column(name = "costo_mano_obra", precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal costoManoObra = BigDecimal.ZERO;
 
-    @Column(name = "costo_refacciones", precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal costoRefacciones = BigDecimal.ZERO;
 
-    @Column(name = "costo_total", precision = 10, scale = 2, nullable = false)
+    @Column(precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal costoTotal = BigDecimal.ZERO;
 
     private Boolean exitoso;
 
-    @Column(name = "requiere_seguimiento", nullable = false)
-    @Builder.Default
-    private Boolean requiereSeguimiento = false;
+    private boolean requiereSeguimiento;
 
-    @Column(name = "proximo_mantenimiento")
     private LocalDate proximoMantenimiento;
 
     @Convert(converter = MapToJsonConverter.class)
-    @Column(name = "fotos_antes", columnDefinition = "JSONB", nullable = false)
+    @Column(columnDefinition = "JSONB")
     @Builder.Default
     private Map<String, String> fotosAntes = new HashMap<>();
 
     @Convert(converter = MapToJsonConverter.class)
-    @Column(name = "fotos_despues", columnDefinition = "JSONB", nullable = false)
+    @Column(columnDefinition = "JSONB")
     @Builder.Default
-    private Map<String, String> fotos_despues = new HashMap<>();
+    private Map<String, String> fotosDespues = new HashMap<>();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name = "ticket_comentarios", schema = "sigel")
+@Table(name = "ticket_comentarios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,16 +33,14 @@ public class TicketComentario {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String comentario;
 
-    @Column(name = "es_interno", nullable = false)
-    @Builder.Default
-    private Boolean esInterno = false;
+    private boolean esInterno = false;
 
     @Convert(converter = MapToJsonConverter.class)
     @Column(columnDefinition = "JSONB", nullable = false)
     @Builder.Default
     private Map<String, Object> adjuntos = new HashMap<>();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

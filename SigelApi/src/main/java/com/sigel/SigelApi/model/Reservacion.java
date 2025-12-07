@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reservaciones", schema = "sigel")
+@Table(name = "reservaciones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,27 +31,22 @@ public class Reservacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "fecha_reservacion", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime fechaReservacion;
 
-    @Column(name = "fecha_inicio", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime fechaInicio;
 
-    @Column(name = "fecha_fin")
     private LocalDateTime fechaFin;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "sigel.reservation_status", nullable = false)
     @Builder.Default
     private ReservationStatus estado = ReservationStatus.pendiente;
 
-    @Column(name = "recordatorios_enviados", nullable = false)
-    @Builder.Default
-    private Integer recordatoriosENviados = 0;
+    private int recordatoriosEnviados;
 
-    @Column(name = "tiempo_gracia_minutos")
     @Builder.Default
-    private Integer tiempoGraciaMinutos = 15;
+    private int tiempoGraciaMinutos = 15;
 
     @OneToOne
     @JoinColumn(name = "prestamo_id")
@@ -61,16 +56,15 @@ public class Reservacion {
     @JoinColumn(name = "cancelada_por")
     private Usuario canceladaPor;
 
-    @Column(name = "motivo_cancelacion", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String motivoCancelacion;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "cancelada_at")
     private LocalDateTime canceladaAt;
 
     @PrePersist

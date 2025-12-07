@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sanciones", schema = "sigel")
+@Table(name = "sanciones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,44 +32,36 @@ public class Sancion {
     private String motivo;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "sigel.severity_level", nullable = false)
+    @Column(nullable = false)
     private SeverityLevel severidad;
 
-    @Column(name = "dias_suspension", nullable = false)
-    @Builder.Default
-    private Integer diasSuspension = 0;
+    private int diasSuspension;
 
     @ManyToOne
     @JoinColumn(name = "prestamo_id")
     private Prestamo prestamo;
+
     @ManyToOne
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 
-    @Column(name = "fecha_aplicacion")
     private LocalDateTime fechaAplicacion;
 
-    @Column(name = "fecha_levantamiento")
     private LocalDateTime fechaLevantamiento;
 
-    @Column(nullable = false)
     @Builder.Default
-    private Boolean activa = true;
+    private boolean activa = true;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean apelada = false;
+    private boolean apelada;
 
-    @Column(name = "fecha_apelacion")
     private LocalDateTime fechaApelacion;
 
-    @Column(name = "motivo_apelacion", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String motivoApelacion;
 
-    @Column(name = "apelacion_aceptada")
     private Boolean apelacionAceptada;
 
-    @Column(name = "created_at", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private LocalDateTime createdAt;
 
     @PrePersist

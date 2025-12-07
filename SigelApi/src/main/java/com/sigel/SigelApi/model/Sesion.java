@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "sesiones", schema = "sigel")
+@Table(name = "sesiones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,23 +26,22 @@ public class Sesion {
     @Column(length = 500, nullable = false, unique = true)
     private String token;
 
-    @Column(name = "refresh_token", length = 500)
+    @Column(length = 500, nullable = false)
     private String refreshToken;
 
-    @Column(name = "ip_address", length = 45)
+    @Column(length = 45)
     private String ipAddress;
 
-    @Column(name = "user_agent", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String userAgent;
 
-    @Column(name = "expira_en", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime expiraEn;
 
-    @Column(nullable = false)
     @Builder.Default
-    private Boolean activo = true;
+    private boolean activo = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

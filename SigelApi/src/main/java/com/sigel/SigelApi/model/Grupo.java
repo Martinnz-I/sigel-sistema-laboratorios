@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "grupos", schema = "sigel")
+@Table(name = "grupos")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,17 +32,16 @@ public class Grupo {
     @Column(length = 20)
     private String turno; // 'matutino' o 'vespertino'
 
-    @Column(name = "ciclo_escolar", nullable = false, length = 12)
+    @Column(nullable = false, length = 12)
     private String cicloEscolar; // Ejemplo: "2024-2025"
 
-    @Column(nullable = false)
     @Builder.Default
     private Boolean activo = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

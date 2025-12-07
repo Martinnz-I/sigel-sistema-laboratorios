@@ -1,7 +1,5 @@
 package com.sigel.SigelApi.security;
 
-import com.sigel.SigelApi.enums.UserRole;
-import com.sigel.SigelApi.exceptions.RegistroException;
 import com.sigel.SigelApi.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -17,10 +15,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Servicio para manejo de JWT tokens
- * Genera, valida y extrae información de tokens JWT
- */
 @Service
 @Slf4j
 public class JwtUtil {
@@ -34,13 +28,8 @@ public class JwtUtil {
     @Value("${jwt.refresh-expiration}")
     private long refreshTokenExpiration;
 
-    // Cache de la clave para no regenerarla en cada llamada
     private SecretKey signingKey;
 
-    /**
-     * Obtiene la clave secreta para firmar tokens (lazy initialization)
-     * Mínimo 32 caracteres para HMAC-SHA512
-     */
     private SecretKey getSigningKey() {
         if (signingKey == null) {
             signingKey = Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -48,10 +37,6 @@ public class JwtUtil {
         return signingKey;
     }
 
-    /**
-     * Genera un JWT token con información del usuario
-     * Token expira según la configuración
-     */
     public String generarToken(Long usuarioId, String email, String rol) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
@@ -59,10 +44,6 @@ public class JwtUtil {
         return crearToken(claims, usuarioId, tokenExpiration);
     }
 
-    /**
-     * Genera un refresh token
-     * Token expira según la configuración
-     */
     public String generarRefreshToken(Long usuarioId, String email) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
@@ -70,9 +51,6 @@ public class JwtUtil {
         return crearToken(claims, usuarioId, refreshTokenExpiration);
     }
 
-    /**
-     * Crea un token JWT con los claims y tiempo de expiración especificados
-     */
     private String crearToken(Map<String, Object> claims, Long usuarioId, long expiration) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
@@ -86,9 +64,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    /**
-     * Valida que un token JWT sea válido y no haya expirado
-     */
     public boolean validarToken(String token) {
         try {
             Jwts.parser()
@@ -102,9 +77,6 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * Extrae las claims (información) del token
-     */
     public Claims obtenerClaims(String token) {
         try {
             return Jwts.parser()
@@ -118,10 +90,6 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * Obtiene el ID del usuario desde el token
-     * Retorna Long para mantener coherencia con el tipo de datos
-     */
     public Long obtenerUsuarioId(String token) {
         Claims claims = obtenerClaims(token);
         if (claims == null) {
@@ -135,33 +103,41 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * Obtiene el email desde el token
-     */
+    public Usuario obtenerUsuarioToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof Usuario) {
+                Usuario usuario = (Usuario) principal;
+                log.info("✅ Usuario encontrado: {}", usuario.getEmail());
+                return usuario;
+            } else {
+                log.warn("⚠️ Principal NO es Usuario, es: {}", principal);
+            }
+        } else {
+            log.warn("⚠️ No hay autenticación o no está autenticado");
+        }
+
+        return null;
+    }
+
     public String obtenerEmail(String token) {
         Claims claims = obtenerClaims(token);
         return claims != null ? claims.get("email", String.class) : null;
     }
 
-    /**
-     * Obtiene el rol desde el token
-     */
     public String obtenerRol(String token) {
         Claims claims = obtenerClaims(token);
         return claims != null ? claims.get("rol", String.class) : null;
     }
 
-    /**
-     * Obtiene la fecha de expiración del token
-     */
     public Date obtenerFechaExpiracion(String token) {
         Claims claims = obtenerClaims(token);
         return claims != null ? claims.getExpiration() : null;
     }
 
-    /**
-     * Verifica si el token ha expirado
-     */
     public boolean esTokenExpirado(String token) {
         Date fechaExpiracion = obtenerFechaExpiracion(token);
         return fechaExpiracion == null || fechaExpiracion.before(new Date());

@@ -23,6 +23,11 @@ public class UsuarioService implements UsuarioImpl {
     }
 
     @Override
+    public List<Usuario> buscarTodosLosAlumnosPorGrupoId(Long grupoId) {
+        return repository.findByGrupoIdAndRolAndActivoTrue(grupoId, UserRole.ALUMNO);
+    }
+
+    @Override
     public Usuario buscarPorId(Long id, RuntimeException exception) {
         return repository.findById(id).orElseThrow(() -> exception);
     }
@@ -68,7 +73,7 @@ public class UsuarioService implements UsuarioImpl {
     }
 
     @Override
-    public Usuario construir(RegistroRequest request, String passwordHash) {
+    public Usuario construir(RegistroRequest request, String passwordHash, String fotoPerfilUrl) {
         return Usuario.builder()
                 .matricula(request.getMatricula())
                 .email(request.getEmail())
@@ -76,9 +81,9 @@ public class UsuarioService implements UsuarioImpl {
                 .nombre(request.getNombre())
                 .apellidoPaterno(request.getApellidoPaterno())
                 .apellidoMaterno(request.getApellidoMaterno())
+                .fotoPerfilUrl(fotoPerfilUrl)
                 .rol(request.getRol() != null ? request.getRol() : UserRole.ALUMNO)
                 .grupo(request.getGrupoId() != null ? grupoService.buscarPorId(request.getGrupoId()) : null)
-                .fechaIngreso(request.getFechaIngreso())
                 .claveDocente(request.getClaveDocente())
                 .build();
     }

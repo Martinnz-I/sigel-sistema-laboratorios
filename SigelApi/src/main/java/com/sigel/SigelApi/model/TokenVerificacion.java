@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tokens_verificacion", schema = "sigel")
+@Table(name = "tokens_verificacion")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,14 +26,12 @@ public class TokenVerificacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "expiry_date", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime expiryDate;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean utilizado = false;
+    private boolean utilizado;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

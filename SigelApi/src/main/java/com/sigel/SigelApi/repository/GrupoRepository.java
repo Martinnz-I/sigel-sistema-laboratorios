@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface GrupoRepository extends JpaRepository<Grupo, Long> {
     List<Grupo> findBySemestre(Integer semestre);
+    List<Grupo> findByActivoTrue();
     List<Grupo> findByEspecialidadId(Long especialidadId);
 }

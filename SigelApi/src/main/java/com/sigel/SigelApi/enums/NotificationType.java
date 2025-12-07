@@ -9,5 +9,7 @@ public enum NotificationType {
     sancion,
     alerta_admin,
     reporte_falla,
-    calibracion_vencida
+    calibracion_vencida,
+    PRESTAMO_ACEPTADO,
+    POSIBLE_OLVIDO_SESION_LABORATORIO // Agregar esto al SQL Jaja
 }

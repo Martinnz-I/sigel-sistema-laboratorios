@@ -1,14 +1,20 @@
 package com.sigel.SigelApi.service.implementation;
 
+import com.sigel.SigelApi.dto.LabPickerDTO;
 import com.sigel.SigelApi.dto.LaboratorioRequest;
 import com.sigel.SigelApi.model.Laboratorio;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface LaboratorioImpl {
-    List<Laboratorio> buscarTodos();
+    List<Laboratorio> obtenerLaboratorios();
+
+    List<LabPickerDTO> obtenerCatalogoLaboratorios();
 
     Laboratorio buscarPorId(Long id);
+
+    boolean existeLaboratorioPorId(Long laboratorioId);
 
     Laboratorio actualizar(Long laboratorioId, LaboratorioRequest request);
 
@@ -16,5 +22,5 @@ public interface LaboratorioImpl {
 
     void eliminar(Long laboratorioId);
 
-    Laboratorio construirLaboratorio(LaboratorioRequest request);
+    Laboratorio construirLaboratorio(LaboratorioRequest request, MultipartFile imagen);
 }

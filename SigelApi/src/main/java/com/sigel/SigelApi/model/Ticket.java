@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name = "tickets", schema = "sigel")
+@Table(name = "tickets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,70 +46,61 @@ public class Ticket {
     private String descripcion;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "sigel.severity_level", nullable = false)
+    @Column(nullable = false)
     private SeverityLevel severidad;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "sigel.ticket_status", nullable = false)
     @Builder.Default
     private TicketStatus estado = TicketStatus.abierto;
 
-    @Column(name = "ocurrio_durante_uso")
     private Boolean ocurrioDuranteUso;
 
     @ManyToOne
     @JoinColumn(name = "prestamo_id")
     private Prestamo prestamo;
 
-    @Column(nullable = false)
     @Builder.Default
-    private Integer prioridad = 3;
+    private int prioridad = 3;
 
     @Convert(converter = MapToJsonConverter.class)
-    @Column(columnDefinition = "JSONB", nullable = false)
+    @Column(columnDefinition = "JSONB")
     @Builder.Default
     private Map<String, String> fotos = new HashMap<>();
 
     @Column(columnDefinition = "TEXT")
     private String diagnostico;
 
-    @Column(name = "solucion_aplicada", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String solucionAplicada;
 
     @ManyToOne
     @JoinColumn(name = "mantenimiento_id")
     private Mantenimiento mantenimiento;
 
-    @Column(name = "fecha_reporte", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime fechaReporte;
 
-    @Column(name = "fecha_asignacion")
     private LocalDateTime fechaAsignacion;
 
-    @Column(name = "fecha_inicio_atencion")
     private LocalDateTime fechaInicioAtencion;
 
-    @Column(name = "fecha_resolucion")
     private LocalDateTime fechaResolucion;
 
-    @Column(name = "tiempo_respuesta_horas")
     private Integer tiempoRespuestaHoras;
 
-    @Column(name = "tiempo_resolucion_horas")
     private Integer tiempoResolucionHoras;
 
     private Integer calificacion;
 
-    @Column(name = "comentario_usuario", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String comentarioUsuario;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "cerrado_at")
     private LocalDateTime cerradoAt;
 
     @PrePersist

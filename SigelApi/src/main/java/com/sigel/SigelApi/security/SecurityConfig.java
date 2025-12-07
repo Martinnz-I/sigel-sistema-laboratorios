@@ -28,8 +28,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 👈 activa CORS
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ Solo auth debe ser público
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/laboratorios/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/especialidades/**").permitAll()
+                        .requestMatchers("/api/grupos/**").permitAll()
+
+                        // ✅ Todo lo demás requiere autenticación
+                        .requestMatchers("/api/equipos/**").authenticated()
+                        .requestMatchers("/api/prestamos/**").authenticated()
+                        .requestMatchers("/api/sesiones-laboratorio/**").authenticated() // 👈 CAMBIAR AQUÍ
+                        .requestMatchers("/api/laboratorios/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -41,16 +50,15 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ⚠️ Usa tu IP local de la PC, la misma que Expo muestra en la terminal (192.168.0.8)
-        configuration.setAllowedOrigins(List.of(
-                "http://192.168.0.8:19006", // Expo web (opcional)
-                "http://192.168.0.8:8081",  // Metro bundler React Native
-                "exp://192.168.0.8:8081"    // App Expo Go en Android
-        ));
+        // ⚠️ Para React Native, permite TODOS los orígenes en desarrollo
+        configuration.setAllowedOriginPatterns(List.of("*")); // 👈 Cambia esto
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(true); // 👈 IMPORTANTE
+
+        // Permite el header Authorization
+        configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

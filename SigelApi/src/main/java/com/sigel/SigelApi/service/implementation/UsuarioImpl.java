@@ -8,6 +8,8 @@ import java.util.List;
 public interface UsuarioImpl {
     List<Usuario> listar();
 
+    List<Usuario> buscarTodosLosAlumnosPorGrupoId(Long grupoId);
+
     Usuario buscarPorId(Long id, RuntimeException exception);
 
     Usuario buscarPorEmail(String email, RuntimeException exception);
@@ -26,7 +28,7 @@ public interface UsuarioImpl {
 
     Usuario guardar(Usuario usuario);
 
-    Usuario construir(RegistroRequest request, String passwordHash);
+    Usuario construir(RegistroRequest request, String passwordHash, String fotoPerfilUrl);
 
     void aplicarUltimoAcceso(Usuario usuario);
 }

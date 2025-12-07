@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tipos_mantenimiento", schema = "sigel")
+@Table(name = "tipos_mantenimiento")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,11 +25,9 @@ public class TipoMantenimiento {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "preventivo", nullable = false)
-    @Builder.Default
-    private Boolean preventivo = false;
+    private boolean preventivo = false;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

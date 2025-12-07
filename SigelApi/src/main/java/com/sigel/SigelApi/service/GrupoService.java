@@ -1,5 +1,6 @@
 package com.sigel.SigelApi.service;
 
+import com.sigel.SigelApi.dto.GrupoDTO;
 import com.sigel.SigelApi.exceptions.AuthenticationException;
 import com.sigel.SigelApi.model.Grupo;
 import com.sigel.SigelApi.repository.GrupoRepository;
@@ -17,6 +18,16 @@ public class GrupoService implements GrupoImpl {
     @Override
     public List<Grupo> listar() {
         return repository.findAll();
+    }
+
+    @Override
+    public List<GrupoDTO> listarGruposActivos() {
+        return repository.findByActivoTrue().stream().map(grupo -> GrupoDTO.builder()
+                        .id(grupo.getId())
+                        .semestre(grupo.getSemestre())
+                        .grupo(grupo.getGrupo())
+                        .especialidadId(grupo.getEspecialidad().getId())
+                        .build()).toList();
     }
 
     @Override

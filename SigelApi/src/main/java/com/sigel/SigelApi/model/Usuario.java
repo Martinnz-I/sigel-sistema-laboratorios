@@ -3,11 +3,10 @@ package com.sigel.SigelApi.model;
 import com.sigel.SigelApi.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "usuarios", schema = "sigel")
+@Table(name = "usuarios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +23,7 @@ public class Usuario {
     @Column(length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(length = 255, nullable = false)
+    @Column(nullable = false)
     private String passwordHash;
 
     // Información personal
@@ -37,7 +36,6 @@ public class Usuario {
     @Column(length = 100, nullable = false)
     private String apellidoMaterno;
 
-    @Column(length = 255)
     private String fotoPerfilUrl;
 
     // Rol y permisos
@@ -51,36 +49,22 @@ public class Usuario {
     @JoinColumn(name = "grupo_id")
     private Grupo grupo;
 
-    @Column(name = "fecha_ingreso", nullable = false)
-    private LocalDate fechaIngreso;
-
     // Para maestros
-    @Column(name = "clave_docente", length = 20, unique = true)
+    @Column(length = 20, unique = true)
     private String claveDocente;
 
-    // Estado y seguridad
-    @Column(nullable = false)
     @Builder.Default
     private Boolean activo = true;
 
-    @Column(name = "email_verificado", nullable = false)
-    @Builder.Default
-    private Boolean emailVerificado = false;
+    private boolean emailVerificado;
 
-    @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;
 
-    @Column(name = "reset_token", length = 255)
-    private String resetToken;
-
-    @Column(name = "reset_token_expira")
-    private LocalDateTime resetTokenExpira;
-
     // Timestamps
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist

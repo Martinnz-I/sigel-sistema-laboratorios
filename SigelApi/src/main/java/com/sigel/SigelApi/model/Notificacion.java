@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notificaciones", schema = "sigel")
+@Table(name = "notificaciones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +25,7 @@ public class Notificacion {
     private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "sigel.notification_type", nullable = false)
+    @Column(nullable = false)
     private NotificationType tipo;
 
     @Column(length = 200, nullable = false)
@@ -34,42 +34,28 @@ public class Notificacion {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String mensaje;
 
-    @Column(nullable = false)
     @Builder.Default
-    private Integer prioridad = 3;
+    private int prioridad = 3;
 
-    @Column(name = "referencia_tipo", length = 50)
+    @Column(length = 50)
     private String referenciaTipo;
 
     @Column(name = "referencia_id")
     private Long referenciaId;
 
-    @Column(name = "action_url", length = 255)
     private String actionUrl;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean leida = false;
+    private boolean leida;
 
-    @Column(name = "leida_at")
     private LocalDateTime leidaAt;
 
-    @Column(name = "enviada_push", nullable = false)
-    @Builder.Default
-    private Boolean enviadaPush = false;
+    private boolean enviadaPush;
 
-    @Column(name = "enviada_email", nullable = false)
-    @Builder.Default
-    private Boolean enviadaEmail = false;
+    private boolean enviadaEmail;
 
-    @Column(name = "enviada_sms", nullable = false)
-    @Builder.Default
-    private Boolean enviadaSms = false;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "expira_at")
     private LocalDateTime expiraAt;
 
     @PrePersist

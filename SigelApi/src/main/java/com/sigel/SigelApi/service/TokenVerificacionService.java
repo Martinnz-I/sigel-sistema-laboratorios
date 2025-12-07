@@ -2,15 +2,23 @@ package com.sigel.SigelApi.service;
 
 import com.sigel.SigelApi.exceptions.AuthenticationException;
 import com.sigel.SigelApi.model.TokenVerificacion;
+import com.sigel.SigelApi.model.Usuario;
 import com.sigel.SigelApi.repository.TokenVerificacionRepository;
 import com.sigel.SigelApi.service.implementation.TokenVerficacionImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TokenVerificacionService implements TokenVerficacionImpl {
     private final TokenVerificacionRepository repository;
+
+    @Value("${jwt.token-verification-hours:24}")
+    private long tokenVerificationHours;
 
     @Override
     public TokenVerificacion buscarPorToken(String token) {
@@ -20,6 +28,22 @@ public class TokenVerificacionService implements TokenVerficacionImpl {
     @Override
     public boolean buscarPorUsuarioYUtilizado(Long idUsuario) {
         return repository.findByUsuarioIdAndUtilizado(idUsuario, false).isPresent();
+    }
+
+    @Override
+    public String generarTokenVerificacion(Usuario usuario) {
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiryDate = LocalDateTime.now().plusHours(tokenVerificationHours);
+
+        TokenVerificacion verificationToken = TokenVerificacion.builder()
+                .token(token)
+                .usuario(usuario)
+                .expiryDate(expiryDate)
+                .utilizado(false)
+                .build();
+
+        guardar(verificationToken);
+        return token;
     }
 
     @Override

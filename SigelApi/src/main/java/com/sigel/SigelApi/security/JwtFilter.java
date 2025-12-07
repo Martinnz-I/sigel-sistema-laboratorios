@@ -18,10 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Filtro JWT que valida el token en cada request
- * Extrae el usuario desde el token y lo coloca en el contexto de seguridad
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -57,44 +53,33 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * Valida el token y configura la autenticación si es válido
-     * Retorna true si la autenticación fue exitosa
-     */
     private boolean validarYConfigurarAutenticacion(String token) {
-        // 1. Validar que el token tenga formato correcto
         if (!jwtUtil.validarToken(token)) {
             return false;
         }
 
-        // 2. Validar que no haya expirado
         if (jwtUtil.esTokenExpirado(token)) {
             return false;
         }
 
-        // 3. Obtener el ID del usuario desde el token
         Long usuarioId = jwtUtil.obtenerUsuarioId(token);
         if (usuarioId == null) {
             return false;
         }
 
-        // 4. Obtener el usuario
         Usuario usuario = jwtUserDetailsService.obtenerUsuarioDesdeToken(token);
         if (usuario == null) {
             return false;
         }
 
-        // 5. Validar que el usuario esté activo
         if (!usuario.getActivo()) {
             return false;
         }
 
-        // 6. Validar que la sesión exista y esté activa en BD
         if (!sesionService.existeSesionActivaPorToken(token)) {
             return false;
         }
 
-        // 7. Configurar la autenticación
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(
                         usuario,

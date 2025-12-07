@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,16 +42,9 @@ public class RegistroRequest {
     @Size(min = 2, max = 100, message = "Apellido debe tener entre 2 y 100 caracteres")
     private String apellidoMaterno;
 
-    @Pattern(regexp = "^[0-9\\-() ]{10,15}$", message = "Teléfono inválido (10-15 caracteres)")
-    private String telefono;
-
     private Long grupoId;
 
     private String claveDocente;
-
-    @NotNull(message = "Fecha de ingreso es requerida")
-    @PastOrPresent(message = "Fecha de ingreso no puede ser en el futuro")
-    private LocalDate fechaIngreso;
 
     @NotNull(message = "El rol del usuario es requerido")
     private UserRole rol;
