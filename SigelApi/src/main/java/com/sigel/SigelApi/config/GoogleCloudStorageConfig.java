@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
@@ -21,8 +20,7 @@ public class GoogleCloudStorageConfig {
 
     @Bean
     public Storage storage() throws IOException {
-        GoogleCredentials credentials = GoogleCredentials
-                .fromStream(new FileInputStream(credentialsPath));
+        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
 
         return StorageOptions.newBuilder()
                 .setProjectId(projectId)

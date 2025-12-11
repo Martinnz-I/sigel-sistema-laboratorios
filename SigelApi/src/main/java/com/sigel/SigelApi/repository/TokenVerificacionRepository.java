@@ -1,7 +1,6 @@
 package com.sigel.SigelApi.repository;
 
 import com.sigel.SigelApi.model.TokenVerificacion;
-import com.sigel.SigelApi.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

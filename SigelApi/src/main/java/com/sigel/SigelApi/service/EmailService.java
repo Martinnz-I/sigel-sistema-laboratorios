@@ -60,7 +60,7 @@ public class EmailService {
     }
 
     private String construirEmailVerificacion(String token) {
-        String urlVerificacion = frontendUrl + "/verificar-email?token=" + token;
+        String urlVerificacion = "sglab://verify?token=" + token;
 
         String template = cargarPlantilla("classpath:templates/verificacion-email.html");
 

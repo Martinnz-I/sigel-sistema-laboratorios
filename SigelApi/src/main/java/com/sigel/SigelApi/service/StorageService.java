@@ -20,7 +20,6 @@ public class StorageService {
     @Value("${gcp.bucket.name}")
     private String bucketName;
 
-    // Formatos de imagen permitidos
     private static final List<String> ALLOWED_CONTENT_TYPES = Arrays.asList(
             "image/jpeg",
             "image/jpg",
@@ -29,8 +28,7 @@ public class StorageService {
             "image/webp"
     );
 
-    // Tamaño máximo: 5MB
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 15 * 1024 * 1024;
 
     public Map<String, String> subirImagenes(List<MultipartFile> imagenes) {
         Map<String, String> resultados = new LinkedHashMap<>();
@@ -47,28 +45,21 @@ public class StorageService {
         return resultados;
     }
 
-    /**
-     * Sube una imagen al bucket de Google Cloud Storage
-     */
     public String subirImagen(MultipartFile file) {
         try {
-            // Generar nombre único
             String fileName = generarNombreImagen(file.getOriginalFilename());
 
-            // Crear el blob en GCS
             BlobId blobId = BlobId.of(bucketName, fileName);
             BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
                     .setContentType(file.getContentType())
                     .build();
 
-            // Subir el archivo
             Blob blob = storage.create(blobInfo, file.getBytes());
 
             if (blob == null) {
                 throw new ImageException("No se pudo subir la imagen correctamente");
             }
 
-            // Retornar la URL pública
             return obtenerUrlPublica(fileName);
 
         } catch (ImageException e) {
@@ -87,19 +78,15 @@ public class StorageService {
                 throw new ImageException("La imagen excede el tamaño máximo permitido");
             }
 
-            // Generar nombre único
             String fileName = generarNombreImagen(nombreArchivo);
 
-            // Crear el blob en GCS
             BlobId blobId = BlobId.of(bucketName, fileName);
             BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
                     .setContentType(contentType)
                     .build();
 
-            // Subir el archivo
             storage.create(blobInfo, bytes);
 
-            // Retornar la URL pública
             return obtenerUrlPublica(fileName);
 
         } catch (ImageException e) {
@@ -109,9 +96,6 @@ public class StorageService {
         }
     }
 
-    /**
-     * Elimina una imagen del bucket
-     */
     public boolean eliminarImagen(String fileName) {
         try {
             BlobId blobId = BlobId.of(bucketName, fileName);
@@ -122,9 +106,6 @@ public class StorageService {
         }
     }
 
-    /**
-     * Descarga una imagen del bucket
-     */
     public byte[] descargarImagen(String fileName) {
         try {
             Blob blob = storage.get(BlobId.of(bucketName, fileName));
@@ -135,21 +116,17 @@ public class StorageService {
 
             return blob.getContent();
         } catch (ImageException e) {
-            throw e; // Re-lanzar ImageException tal cual
+            throw e;
         } catch (Exception e) {
             throw new ImageException("Error al descargar la imagen", e);
         }
     }
-
-
-    // ============ VALIDACIONES ============
 
     public void validarImagen(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new ImageException("No se ha proporcionado ningún archivo");
         }
 
-        // Validar tipo de contenido
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new ImageException(
@@ -157,14 +134,12 @@ public class StorageService {
             );
         }
 
-        // Validar tamaño
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new ImageException(
                     "La imagen excede el tamaño máximo permitido de 5MB"
             );
         }
 
-        // Validar nombre de archivo
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || originalFilename.trim().isEmpty()) {
             throw new ImageException("El archivo no tiene un nombre válido");
@@ -184,8 +159,6 @@ public class StorageService {
             validarImagen(imagen);
         }
     }
-
-    // ============ UTILIDADES ============
 
     private String generarNombreImagen(String originalFileName) {
         String extension = obtenerExtensionArchivo(originalFileName);

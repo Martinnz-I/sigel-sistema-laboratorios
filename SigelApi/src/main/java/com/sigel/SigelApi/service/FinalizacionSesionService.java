@@ -22,7 +22,6 @@ public class FinalizacionSesionService {
 
     @Transactional
     public void finalizarSesionConPrestamos(SesionLaboratorio sesion) {
-        // Mueve aquí la lógica de finalizarSesionAutomaticamente
         sesion.setEstado(EstadoSesionLab.FINALIZADA);
         sesion.setFechaFinReal(LocalDateTime.now());
 

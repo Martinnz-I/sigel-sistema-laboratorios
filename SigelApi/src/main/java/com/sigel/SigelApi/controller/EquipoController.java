@@ -26,8 +26,6 @@ public class EquipoController {
     ) {
         Long response = equipoService.validarEquipoASolicitar(codigo);
 
-        System.out.println("Equipo buscado por codigo: " + response);
-
         return ResponseEntity
                 .ok()
                 .body(ApiResponse.success(

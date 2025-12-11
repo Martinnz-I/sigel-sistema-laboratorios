@@ -40,7 +40,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             try {
                 if (validarYConfigurarAutenticacion(token)) {
-                    log.debug("Token validado exitosamente");
                 } else {
                     log.debug("Fallo la validación del token");
                 }
@@ -88,7 +87,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 );
 
         SecurityContextHolder.getContext().setAuthentication(authToken);
-        log.info("Usuario autenticado: {}, rol: {}", usuario.getEmail(), usuario.getRol().getAuthority());
         return true;
     }
 }

@@ -30,10 +30,10 @@ public class Grupo {
     private Especialidad especialidad;
 
     @Column(length = 20)
-    private String turno; // 'matutino' o 'vespertino'
+    private String turno;
 
     @Column(nullable = false, length = 12)
-    private String cicloEscolar; // Ejemplo: "2024-2025"
+    private String cicloEscolar;
 
     @Builder.Default
     private Boolean activo = true;

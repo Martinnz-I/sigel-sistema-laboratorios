@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 public class SesionLaboratorioScheduler {
     private final SesionLaboratorioService service;
 
-    @Scheduled(cron = "0 */15 * * * *") // Cada 15 minutos
+    @Scheduled(cron = "0 */15 * * * *")
     @Transactional
     public void autoFinalizarSesionesVencidas() {
-        System.out.println("Ejecutando tarea a los 15m");
+        System.out.println("Ejecutando inspección sesión laboratorio cada 15 Minutos");
         service.autoFinalizarSesionesVencidas();
     }
 }

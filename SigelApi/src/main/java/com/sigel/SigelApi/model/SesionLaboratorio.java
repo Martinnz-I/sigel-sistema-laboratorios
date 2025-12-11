@@ -1,7 +1,6 @@
 package com.sigel.SigelApi.model;
 
 
-import com.sigel.SigelApi.enums.EquipmentStatus;
 import com.sigel.SigelApi.enums.EstadoSesionLab;
 import com.sigel.SigelApi.enums.ModoAsignacionLab;
 import jakarta.persistence.*;

@@ -1,11 +1,8 @@
 package com.sigel.SigelApi.repository;
 
-import com.sigel.SigelApi.dto.EquipoInternoPrestadoDTO;
 import com.sigel.SigelApi.enums.LoanStatus;
 import com.sigel.SigelApi.model.PrestamoDetalle;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
